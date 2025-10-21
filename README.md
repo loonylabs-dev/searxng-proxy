@@ -1,120 +1,132 @@
 # SearXNG Proxy
 
-**Self-hosted meta-search engine with API key authentication and Cloudflare Tunnel exposition**
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](#docker-deployment-recommended)
+[![API](https://img.shields.io/badge/API-Authenticated-10A37F?style=for-the-badge&logo=auth0&logoColor=white)](#authentication)
+[![SearXNG](https://img.shields.io/badge/SearXNG-Meta--Search-3050FF?style=for-the-badge&logo=duckduckgo&logoColor=white)](#api-usage)
+[![Tests](https://img.shields.io/badge/Tests-Passing-4CAF50?style=for-the-badge&logo=jest&logoColor=white)](#running-tests)
+[![Health](https://img.shields.io/badge/Health-Check-4CAF50?style=for-the-badge&logo=heart&logoColor=white)](#endpoints)
 
-This project provides a production-ready SearXNG deployment with:
-- 🔒 **API Key Authentication** - Secure access control via Bearer tokens
-- 🌐 **Cloudflare Tunnel** - Expose securely to the internet without port forwarding
-- 🔍 **Multi-Engine Search** - Aggregates results from Google, Bing, DuckDuckGo, Qwant, Yahoo, Brave
-- 🐳 **Docker Compose** - Complete stack with SearXNG + Proxy + Cloudflared
-- ♾️ **Unlimited Searches** - No rate limits (self-hosted)
+A simple proxy server for SearXNG meta-search engine with authentication, designed to provide secure access to privacy-respecting search.
 
----
+<details>
+<summary>📋 Table of Contents</summary>
 
-## Architecture
+- [✨ Features](#features)
+- [🚀 Quick Start](#quick-start)
+- [🔌 API Usage](#api-usage)
+- [☁️ Cloudflare Tunnel Setup](#cloudflare-tunnel-setup)
+- [⚙️ Configuration](#configuration)
+- [🧪 Running Tests](#running-tests)
+- [📂 Project Structure](#project-structure)
+- [🔒 Security Notes](#security-notes)
+- [🔧 Troubleshooting](#troubleshooting)
+- [📄 License](#license)
+- [🤝 Contributing](#contributing)
 
-```
-Internet (HTTPS)
-    ↓
-Cloudflare Tunnel
-    ↓
-Proxy (Express + API Key Auth)
-    ↓
-SearXNG (Meta-Search Engine)
-```
+</details>
 
-**Services:**
-1. **SearXNG** - Meta-search engine (internal only)
-2. **Proxy** - Express server with API key authentication
-3. **Cloudflared** - Cloudflare Tunnel client
+## ✨ Features
 
----
+- **API Key Authentication**: Secure access control via Bearer tokens
+- **Cloudflare Tunnel Integration**: Built-in support for secure external access
+- **Docker Support**: Complete containerized setup with Docker Compose
+- **Health Check Endpoints**: Monitor proxy status (authenticated + unauthenticated)
+- **Multi-Engine Search**: Aggregates results from Google, Bing, DuckDuckGo, Qwant, Yahoo, Brave
+- **Flexible Configuration**: Environment-based configuration
+- **Comprehensive Tests**: Unit and integration tests with Jest
+- **Unlimited Searches**: No rate limits (self-hosted)
+- **JSON & HTML Output**: Support for both JSON API and HTML responses
 
-## Quick Start
+## 🚀 Quick Start
 
-### 1. Clone and Setup
+<details>
+<summary>📋 Prerequisites</summary>
 
-```bash
-git clone https://github.com/loonylabs-dev/searxng-proxy.git
-cd searxng-proxy
+- Docker and Docker Compose
+- Node.js 18+ (for local development)
+- Cloudflare account (optional, for tunnel)
 
-# Copy environment file
-cp .env.example .env
+</details>
 
-# Edit .env and set your API key
-nano .env
-```
+### 🐳 Docker Deployment (Recommended)
 
-### 2. Generate API Key
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/loonylabs-dev/searxng-proxy.git
+   cd searxng-proxy
+   ```
 
-```bash
-# Generate a secure API key
-openssl rand -base64 32
+2. **Set up environment:**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your API key
+   ```
 
-# Add to .env:
-# API_KEY=your_generated_key_here
-```
+3. **Generate API Key:**
+   ```bash
+   # Generate a secure API key
+   openssl rand -base64 32
 
-### 3. Configure Cloudflare Tunnel
+   # Add to .env:
+   # API_KEY=your_generated_key_here
+   ```
 
-See [cloudflare/README.md](cloudflare/README.md) for detailed setup instructions.
+4. **Start services:**
+   ```bash
+   docker-compose up -d
+   ```
 
-**Summary:**
-```bash
-# Login to Cloudflare
-cloudflared login
+5. **Verify:**
+   ```bash
+   # Check services
+   docker-compose ps
 
-# Create tunnel
-cloudflared tunnel create searxng-proxy
+   # Test local endpoint (requires port mapping, see Configuration)
+   curl -H "Authorization: Bearer YOUR_API_KEY" \
+     "http://localhost:3000/search?q=test&format=json"
+   ```
 
-# Copy credentials
-cp ~/.cloudflared/YOUR-TUNNEL-ID.json ./cloudflare/
+<details>
+<summary>💻 Local Development</summary>
 
-# Configure tunnel
-cp cloudflare/config.example.yml cloudflare/config.yml
-# Edit config.yml with your tunnel ID and domain
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-# Configure DNS
-cloudflared tunnel route dns searxng-proxy search.loonylabs.dev
-```
+2. **Set up environment:**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration (use SEARXNG_URL=http://localhost:8080)
+   ```
 
-### 4. Start Services
+3. **Start SearXNG (Docker):**
+   ```bash
+   docker run -d -p 8080:8080 -v ./searxng:/etc/searxng searxng/searxng:latest
+   ```
 
-```bash
-docker-compose up -d
-```
+4. **Start the proxy:**
+   ```bash
+   npm run dev          # Development mode
+   # or
+   npm run build && npm start  # Production mode
+   ```
 
-### 5. Verify
+</details>
 
-```bash
-# Check services
-docker-compose ps
+## 🔌 API Usage
 
-# Check logs
-docker-compose logs -f
+The proxy provides secure access to SearXNG with API key authentication.
 
-# Test local endpoint
-curl -H "Authorization: Bearer YOUR_API_KEY" \
-  "http://localhost:3000/search?q=test&format=json"
+### 🔐 Authentication
 
-# Test public endpoint (after Cloudflare setup)
-curl -H "Authorization: Bearer YOUR_API_KEY" \
-  "https://search.loonylabs.dev/search?q=test&format=json"
-```
-
----
-
-## API Usage
-
-### Authentication
-
-All requests require a Bearer token:
+All requests (except `/healthz`) require a Bearer token:
 
 ```bash
 Authorization: Bearer YOUR_API_KEY
 ```
 
-### Endpoints
+### 📍 Endpoints
 
 #### `GET /search`
 
@@ -124,6 +136,7 @@ Search with SearXNG.
 - `q` (required) - Search query
 - `format` (optional) - Response format: `json` (default) or `html`
 - `engines` (optional) - Specific engines to use
+- Additional SearXNG parameters (language, time_range, etc.)
 
 **Example:**
 
@@ -173,109 +186,15 @@ Health check (no authentication required - for Cloudflare monitoring).
 curl "https://search.loonylabs.dev/healthz"
 ```
 
----
-
-## Configuration
-
-### Environment Variables
-
-Create `.env` from `.env.example`:
-
-```bash
-# Required: API key for authentication
-API_KEY=your_secret_api_key_here
-
-# SearXNG Configuration
-SEARXNG_BASE_URL=http://localhost:8080/
-SEARXNG_SECRET_KEY=change-this-secret-key-in-production
+**Response:**
+```json
+{
+  "status": "ok",
+  "service": "searxng-proxy"
+}
 ```
 
-### SearXNG Settings
-
-Edit `searxng/settings.yml` to customize:
-- Search engines
-- UI theme
-- Rate limiting
-- Result formatting
-- Language preferences
-
-See [SearXNG Documentation](https://docs.searxng.org) for all options.
-
----
-
-## Development
-
-### Local Development (without Docker)
-
-```bash
-# Install dependencies
-npm install
-
-# Start SearXNG (Docker)
-docker run -d -p 8080:8080 -v ./searxng:/etc/searxng searxng/searxng:latest
-
-# Start proxy (dev mode)
-npm run dev
-```
-
-### Build TypeScript
-
-```bash
-npm run build
-npm start
-```
-
-### Useful Commands
-
-```bash
-# Start services
-npm run start:searxng
-# or
-docker-compose up -d
-
-# Stop services
-npm run stop:searxng
-# or
-docker-compose down
-
-# View logs
-npm run logs:searxng
-# or
-docker-compose logs -f
-
-# Restart services
-npm run restart:searxng
-# or
-docker-compose restart
-```
-
----
-
-## Project Structure
-
-```
-searxng-proxy/
-├── src/
-│   └── index.ts              # Express proxy server with API key auth
-├── searxng/
-│   └── settings.yml          # SearXNG configuration
-├── cloudflare/
-│   ├── config.example.yml    # Cloudflare tunnel template
-│   └── README.md             # Cloudflare setup guide
-├── docker-compose.yml        # Complete stack (searxng + proxy + cloudflared)
-├── Dockerfile                # Proxy service image
-├── .env.example              # Environment variables template
-├── .gitignore                # Git ignore rules
-├── package.json              # Node.js dependencies
-├── tsconfig.json             # TypeScript configuration
-└── README.md                 # This file
-```
-
----
-
-## Integration Example
-
-### Use in your application
+### 🎯 Integration Example
 
 ```typescript
 // searxng-client.ts
@@ -310,19 +229,212 @@ const results = await search('machine learning tutorials', 10);
 console.log(results);
 ```
 
----
+## ☁️ Cloudflare Tunnel Setup
 
-## Security Notes
+For secure external access:
+
+1. **Set up Cloudflare Tunnel:**
+   ```bash
+   # Install cloudflared and create a tunnel
+   cloudflared tunnel create searxng-proxy
+   ```
+
+2. **Configure tunnel:**
+   ```bash
+   cp cloudflare/config.example.yml cloudflare/config.yml
+   # Edit config.yml with your tunnel ID and domain
+   ```
+
+3. **Add tunnel credentials:**
+   Place your tunnel credentials JSON file in `cloudflare/`
+
+4. **Configure DNS:**
+   ```bash
+   cloudflared tunnel route dns searxng-proxy search.loonylabs.dev
+   ```
+
+5. **The tunnel will automatically start with Docker Compose**
+
+See [cloudflare/README.md](cloudflare/README.md) for detailed setup instructions.
+
+## ⚙️ Configuration
+
+<details>
+<summary>🔧 Environment Variables</summary>
+
+Create `.env` from `.env.example`:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `API_KEY` | Required | Authentication key for API access |
+| `SEARXNG_URL` | `http://searxng:8080` (Docker)<br>`http://localhost:8080` (local) | SearXNG server URL |
+| `PORT` | `3000` | Proxy server port (local dev only) |
+| `PROXY_URL` | - | Proxy URL for integration tests (optional) |
+
+**Example `.env`:**
+```bash
+API_KEY=your_secret_api_key_here
+SEARXNG_URL=http://searxng:8080
+SEARXNG_SECRET_KEY=change-this-secret-key-in-production
+
+# For integration tests (optional)
+PROXY_URL=https://search.loonylabs.dev
+```
+
+</details>
+
+<details>
+<summary>📋 SearXNG Settings</summary>
+
+Edit `searxng/settings.yml` to customize:
+- Search engines
+- UI theme
+- Rate limiting
+- Result formatting
+- Language preferences
+
+See [SearXNG Documentation](https://docs.searxng.org) for all options.
+
+</details>
+
+<details>
+<summary>🐳 Docker Configuration</summary>
+
+The Docker setup includes:
+- **SearXNG container**: Meta-search engine (internal only)
+- **Proxy container**: Express server with API key authentication
+- **Cloudflared container**: Cloudflare Tunnel client (optional)
+
+**Architecture:**
+
+```
+Internet (HTTPS)
+    ↓
+Cloudflare Tunnel
+    ↓
+Proxy (Express + API Key Auth)
+    ↓
+SearXNG (Meta-Search Engine)
+```
+
+**Port Exposure:**
+By default, no ports are exposed to the host for security. Access is via Cloudflare Tunnel.
+
+To expose port 3000 for local testing, add to `docker-compose.yml`:
+```yaml
+proxy:
+  ports:
+    - "3000:3000"  # Add this line
+```
+
+</details>
+
+## 🧪 Running Tests
+
+The project includes comprehensive unit and integration tests.
+
+### Quick Test Commands
+
+```bash
+# Run all tests
+npm test
+
+# Run only unit tests (no Docker required)
+npm run test:unit
+
+# Run only integration tests (Docker required)
+npm run test:integration
+
+# Run tests in watch mode
+npm run test:unit:watch
+
+# Run tests with coverage
+npm run test:unit:coverage
+```
+
+### Test Structure
+
+```
+/tests
+├── /unit              # Unit tests (no Docker required)
+│   └── /api           # API endpoint tests
+│       ├── health.test.ts      # Health endpoint tests (9 tests)
+│       └── search.test.ts      # Search logic tests (21 tests)
+├── /integration       # Integration tests (Docker required)
+│   └── searxng-integration.test.ts  # End-to-end search tests (17 tests)
+└── README.md          # Detailed testing documentation
+```
+
+### Running Integration Tests
+
+Integration tests require running Docker containers:
+
+```bash
+# 1. Start services
+docker-compose up -d
+
+# 2. Configure PROXY_URL in .env
+# Option A: Use Cloudflare Tunnel URL (recommended)
+PROXY_URL=https://search.loonylabs.dev
+
+# Option B: Use localhost (requires port mapping)
+# Add "ports: - 3000:3000" to proxy service in docker-compose.yml
+PROXY_URL=http://localhost:3000
+
+# 3. Run integration tests
+npm run test:integration
+```
+
+**Test Coverage:**
+- ✅ 47+ tests across unit and integration suites
+- ✅ Health check endpoints (`/health`, `/healthz`)
+- ✅ Search functionality (JSON/HTML formats)
+- ✅ Authentication & authorization
+- ✅ Error handling (missing params, invalid API keys)
+- ✅ Response validation
+- ✅ Special characters & unicode support
+
+For detailed testing documentation, see [tests/README.md](tests/README.md).
+
+## 📂 Project Structure
+
+```
+searxng-proxy/
+├── src/
+│   └── index.ts              # Express proxy server with API key auth
+├── tests/                    # Test suite
+│   ├── unit/                 # Unit tests
+│   │   └── api/              # API endpoint unit tests
+│   │       ├── health.test.ts
+│   │       └── search.test.ts
+│   ├── integration/          # Integration tests
+│   │   └── searxng-integration.test.ts
+│   └── README.md             # Testing documentation
+├── searxng/
+│   └── settings.yml          # SearXNG configuration
+├── cloudflare/
+│   ├── config.example.yml    # Cloudflare tunnel template
+│   └── README.md             # Cloudflare setup guide
+├── docker-compose.yml        # Complete stack (searxng + proxy + cloudflared)
+├── Dockerfile                # Proxy service image
+├── .env.example              # Environment variables template
+├── jest.config.js            # Jest test configuration
+├── jest.setup.js             # Jest setup file
+├── package.json              # Node.js dependencies
+├── tsconfig.json             # TypeScript configuration
+└── README.md                 # This file
+```
+
+## 🔒 Security Notes
 
 - **API Key**: Use a strong, randomly generated key (32+ characters)
 - **HTTPS Only**: Cloudflare Tunnel provides automatic HTTPS
 - **Credentials**: Never commit `.env`, `config.yml`, or `*.json` files
 - **Rate Limiting**: Consider adding rate limiting in production
 - **Monitoring**: Monitor usage via Cloudflare Analytics
+- **Port Exposure**: By default, no ports are exposed to host (secure)
 
----
-
-## Troubleshooting
+## 🔧 Troubleshooting
 
 ### Services won't start
 
@@ -333,12 +445,18 @@ docker-compose --version
 
 # Check logs
 docker-compose logs
+
+# Check specific service
+docker-compose logs proxy
+docker-compose logs searxng
 ```
 
 ### 401 Unauthorized
 
 - Verify API key in `.env` matches your request header
 - Check: `Authorization: Bearer YOUR_API_KEY` (space after "Bearer")
+- API key is case-sensitive
+- Ensure no extra spaces or newlines in API key
 
 ### Cloudflare Tunnel not connecting
 
@@ -350,6 +468,7 @@ docker-compose logs cloudflared
 cat cloudflare/config.yml
 
 # Test tunnel status (on Cloudflare dashboard)
+# https://one.dash.cloudflare.com/
 ```
 
 ### SearXNG not returning results
@@ -360,31 +479,82 @@ docker-compose logs searxng
 
 # Test SearXNG directly (inside Docker network)
 docker-compose exec proxy wget -O- "http://searxng:8080/search?q=test&format=json"
+
+# Check if SearXNG is running
+docker-compose ps searxng
 ```
+
+### Integration tests fail with ECONNREFUSED
+
+**Cause**: Proxy port not exposed to host (intentional for security)
+
+**Solutions:**
+
+1. **Use Cloudflare Tunnel (recommended)**:
+   ```bash
+   # In .env
+   PROXY_URL=https://search.yourdomain.com
+   ```
+
+2. **Temporarily expose port for testing**:
+   ```yaml
+   # In docker-compose.yml
+   proxy:
+     ports:
+       - "3000:3000"
+   ```
+   Then restart: `docker-compose down && docker-compose up -d`
+
+### NPM package installation fails
+
+```bash
+# Clear npm cache
+npm cache clean --force
+
+# Remove node_modules and package-lock.json
+rm -rf node_modules package-lock.json
+
+# Reinstall
+npm install
+```
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Run tests: `npm test`
+6. Submit a pull request
+
+For questions or support, please open an issue on GitHub.
 
 ---
 
-## Similar Projects
+## 📚 Similar Projects
 
 This project follows the same pattern as:
 - [ollama-proxy](https://github.com/loonylabs-dev/ollama-proxy) - Ollama API with authentication and Cloudflare Tunnel
+- [stockwatcher-app](https://github.com/loonylabs-dev/stockwatcher-app) - Multi-service application with comprehensive testing
 
 ---
 
-## License
-
-MIT License - see [LICENSE](LICENSE) file
-
----
-
-## Contributing
-
-Issues and pull requests welcome!
-
----
-
-## Links
+## 🔗 Links
 
 - **SearXNG**: https://github.com/searxng/searxng
 - **SearXNG Docs**: https://docs.searxng.org
 - **Cloudflare Tunnels**: https://developers.cloudflare.com/cloudflare-one/connections/connect-apps
+
+---
+
+<div align="center">
+
+**Made with ❤️ by loonylabs-dev**
+
+**Privacy-Respecting Meta-Search API ✅**
+
+</div>
