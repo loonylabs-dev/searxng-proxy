@@ -539,7 +539,6 @@ For questions or support, please open an issue on GitHub.
 
 This project follows the same pattern as:
 - [ollama-proxy](https://github.com/loonylabs-dev/ollama-proxy) - Ollama API with authentication and Cloudflare Tunnel
-- [stockwatcher-app](https://github.com/loonylabs-dev/stockwatcher-app) - Multi-service application with comprehensive testing
 
 ---
 
