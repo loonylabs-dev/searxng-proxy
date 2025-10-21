@@ -275,7 +275,6 @@ Create `.env` from `.env.example`:
 ```bash
 API_KEY=your_secret_api_key_here
 SEARXNG_URL=http://searxng:8080
-SEARXNG_SECRET_KEY=change-this-secret-key-in-production
 
 # For integration tests (optional)
 PROXY_URL=https://search.loonylabs.dev
