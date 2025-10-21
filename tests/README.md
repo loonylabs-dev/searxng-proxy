@@ -11,7 +11,7 @@ Complete testing documentation for the SearXNG Proxy API server.
 | `npm run test:unit:coverage` | Unit | ❌ No | Jest with coverage report |
 | `npm run test:integration` | Integration | ✅ Yes | Integration tests (real search calls) |
 | `npm run test:all` | Suite | ⚠️ Mixed | All automated tests |
-| `npm run test:ci` | CI/CD | ❌ No | CI-optimized Jest tests |
+| `npm run test:ci` | CI/CD | ⚠️ Mixed | CI-optimized all tests with coverage |
 
 ---
 
@@ -167,7 +167,7 @@ npm run test:unit:coverage     # With coverage report
 4. ✅ Performs search with HTML format
 5. ✅ Handles special characters in query
 6. ✅ Handles unicode characters in query
-7. ✅ Returns results for simple query
+7. ✅ Returns valid response structure for simple query
 8. ✅ Handles additional query parameters
 
 **Error Handling** (4 tests):

@@ -61,7 +61,7 @@ describe('Search Endpoint', () => {
       const invalidQueries = ['', '   ', null, undefined];
 
       invalidQueries.forEach(query => {
-        const isValid = query && query.trim().length > 0;
+        const isValid = !!(query && query.trim().length > 0);
         expect(isValid).toBe(false);
       });
     });
