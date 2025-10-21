@@ -1,0 +1,115 @@
+# SearXNG Configuration for searxng-proxy
+# Self-hosted meta-search engine for unlimited web searches
+
+use_default_settings: true
+
+general:
+  instance_name: "SearXNG Proxy"
+  contact_url: false
+
+search:
+  safe_search: 0  # No content filtering
+  autocomplete: ""
+  default_lang: "en"
+  formats:
+    - html
+    - json
+
+server:
+  # Bind to all interfaces inside container
+  bind_address: "0.0.0.0"
+  port: 8080
+
+  # Secret key for instance (change in production via env var)
+  secret_key: "change-this-secret-key-in-production"
+
+  # Limit request rate to prevent abuse
+  limiter: false  # Disabled for internal use
+
+  # Image proxy settings
+  image_proxy: false
+
+ui:
+  default_theme: simple
+  query_in_title: true
+  infinite_scroll: false
+  center_alignment: false
+
+# Search engines configuration
+engines:
+  # Google - High quality general results
+  - name: google
+    engine: google
+    shortcut: go
+    use_mobile_ui: false
+
+  # Bing - Good for news and diverse results
+  - name: bing
+    engine: bing
+    shortcut: bi
+
+  # DuckDuckGo - Privacy-focused results
+  - name: duckduckgo
+    engine: duckduckgo
+    shortcut: ddg
+
+  # Qwant - European alternative
+  - name: qwant
+    engine: qwant
+    shortcut: qw
+    categories: general
+
+  # Yahoo - Additional news coverage
+  - name: yahoo
+    engine: yahoo
+    shortcut: yh
+
+  # Brave - Independent index
+  - name: brave
+    engine: brave
+    shortcut: br
+    time_range_support: true
+
+# Disable plugins for performance
+enabled_plugins: []
+
+# Outgoing request configuration
+outgoing:
+  # User agent for requests
+  useragent_suffix: "SearXNG-Proxy/1.0"
+
+  # Request timeout
+  request_timeout: 3.0
+
+  # Max request timeout
+  max_request_timeout: 10.0
+
+  # Enable HTTP/2
+  enable_http2: true
+
+  # Retries
+  retries: 1
+
+  # Pool connections
+  pool_connections: 100
+  pool_maxsize: 20
+
+# Performance settings
+redis:
+  url: false  # No Redis caching for now
+
+doi_resolvers:
+  oadoi.org: "https://oadoi.org/"
+  doi.org: "https://doi.org/"
+
+default_doi_resolver: "oadoi.org"
+
+# Result formatting
+result_proxy:
+  url: false
+  key: ""
+
+# Hostname replace
+hostname_replace:
+  "(.*\\.)?youtube\\.com$": "invidious.snopyta.org"
+  "(.*\\.)?reddit\\.com$": "teddit.net"

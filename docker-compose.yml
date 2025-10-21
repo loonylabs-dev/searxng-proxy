@@ -1,0 +1,58 @@
+services:
+  # SearXNG - Self-hosted meta-search engine
+  searxng:
+    image: searxng/searxng:latest
+    pull_policy: if_not_present
+    restart: unless-stopped
+    container_name: searxng-instance
+    environment:
+      SEARXNG_BASE_URL: ${SEARXNG_BASE_URL:-http://localhost:8080/}
+      SEARXNG_SECRET: ${SEARXNG_SECRET_KEY:-change-this-secret-key-in-production}
+    volumes:
+      - ./searxng:/etc/searxng:rw
+    networks:
+      - searxng_network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Proxy - API Key authentication layer
+  proxy:
+    build: .
+    restart: unless-stopped
+    container_name: searxng-proxy
+    environment:
+      - API_KEY=${API_KEY}
+      - SEARXNG_URL=http://searxng:8080
+      - PORT=3000
+    depends_on:
+      searxng:
+        condition: service_healthy
+    networks:
+      - searxng_network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Cloudflared Tunnel - Expose to internet
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    container_name: searxng-cloudflared
+    networks:
+      - searxng_network
+    volumes:
+      - ./cloudflare:/etc/cloudflared
+    command: tunnel --no-autoupdate run
+    depends_on:
+      - proxy
+
+networks:
+  searxng_network:
+    name: searxng_network
+    driver: bridge

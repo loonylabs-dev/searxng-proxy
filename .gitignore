@@ -1,0 +1,86 @@
+# Compiled TypeScript files
+/dist
+/build
+
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# Environment variables and local configurations
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.envrc
+*.env
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Caches
+.npm
+.eslintcache
+.stylelintcache
+.node_repl_history
+.yarn-integrity
+
+# IDE and editor-specific files
+/.idea
+/.vscode
+*.swp
+*.swo
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings
+.history
+
+# Coverage and test files
+/coverage
+/.nyc_output
+/test-results
+
+# Build-generated files
+.webpack
+.serverless
+.fusebox
+.dynamodb
+.tern-port
+.lock-wscript
+.next
+.nuxt
+
+# Temporary files
+/tmp
+/temp
+
+# User-specific configurations or local scripts
+*.local.js
+*.local.ts
+*.local.json
+
+# Results
+*.results.json
+*-results.json
+
+#.lock
+*lock.json
+
+# Cloudflare Tunnel sensitive files
+/cloudflare/config.yml
+/cloudflare/*.json
+
+# Keep example files
+!cloudflare/config.example.yml
+
+# SearXNG settings (keep example, ignore custom)
+# We keep settings.yml in git for this project
