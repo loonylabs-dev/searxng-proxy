@@ -5,6 +5,6 @@ tunnel: your-tunnel-id-here
 credentials-file: /etc/cloudflared/your-tunnel-id-here.json
 
 ingress:
-  - hostname: search.loonylabs.dev  # Your domain for SearXNG
+  - hostname: search.yourdomain.com  # Your domain for SearXNG
     service: http://proxy:3000      # Target the proxy service (with API key auth)
   - service: http_status:404
